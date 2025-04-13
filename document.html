@@ -1,0 +1,630 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl"><head>
+<meta http-equiv="content-type" content="text/html; charset=UTF-8">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>استخراج لینک‌های قابل دانلود و اضافه کردن به IDM</title>
+    <link href="document_files/tailwind.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="document_files/all.min.css">
+    <style>
+        body {
+            font-family: 'Tahoma', 'Arial', sans-serif;
+            line-height: 1.8;
+        }
+        pre {
+            direction: ltr;
+            text-align: left;
+        }
+        .code-block {
+            direction: ltr;
+            text-align: left;
+            unicode-bidi: isolate;
+        }
+        .highlight-line {
+            background-color: rgba(255, 255, 100, 0.3);
+        }
+    </style>
+</head>
+<body class="bg-gray-50">
+    <div class="container max-w-5xl mx-auto px-4 py-8">
+        <!-- Header -->
+        <header class="bg-blue-600 text-white p-6 rounded-lg shadow-lg mb-8">
+            <h1 class="text-3xl font-bold mb-2">استخراج لینک‌های قابل دانلود و اضافه کردن به IDM</h1>
+            <p class="text-xl">یک برنامه پایتون با رابط گرافیکی برای استخراج لینک‌های قابل دانلود از یک سایت و اضافه کردن آنها به صف دانلود IDM</p>
+        </header>
+
+        <!-- Introduction -->
+        <section class="bg-white p-6 rounded-lg shadow mb-8">
+            <h2 class="text-2xl font-bold mb-4 text-blue-700">معرفی برنامه</h2>
+            <p class="mb-4">این برنامه به شما امکان می‌دهد تا با وارد 
+کردن آدرس یک وب‌سایت، تمام لینک‌های قابل دانلود را استخراج کرده و 
+مستقیماً به نرم‌افزار Internet Download Manager (IDM) اضافه کنید. برنامه
+ دارای رابط گرافیکی کاربرپسند بوده و استفاده از آن بسیار ساده است.</p>
+            
+            <div class="flex flex-col md:flex-row gap-6 mt-6">
+                <div class="flex-1 bg-blue-50 p-4 rounded-lg">
+                    <h3 class="text-xl font-bold text-blue-600 mb-2"><i class="fas fa-star mr-2"></i>ویژگی‌های برنامه</h3>
+                    <ul class="list-disc list-inside space-y-2">
+                        <li>رابط گرافیکی کاربرپسند</li>
+                        <li>استخراج خودکار لینک‌های قابل دانلود</li>
+                        <li>امکان فیلتر کردن فایل‌ها بر اساس پسوند</li>
+                        <li>اضافه کردن مستقیم به صف دانلود IDM</li>
+                        <li>نمایش پیشرفت فرآیند استخراج</li>
+                        <li>امکان تنظیم پروکسی (اختیاری)</li>
+                    </ul>
+                </div>
+                <div class="flex-1 bg-green-50 p-4 rounded-lg">
+                    <h3 class="text-xl font-bold text-green-600 mb-2"><i class="fas fa-cogs mr-2"></i>پیش‌نیازها</h3>
+                    <ul class="list-disc list-inside space-y-2">
+                        <li>پایتون نسخه 3.6 یا بالاتر</li>
+                        <li>نرم‌افزار Internet Download Manager</li>
+                        <li>کتابخانه‌های: requests، beautifulsoup4، pywin32</li>
+                        <li>کتابخانه Tkinter (معمولاً همراه پایتون نصب می‌شود)</li>
+                    </ul>
+                </div>
+            </div>
+        </section>
+
+        <!-- Screenshot -->
+        <section class="bg-white p-6 rounded-lg shadow mb-8">
+            <h2 class="text-2xl font-bold mb-4 text-blue-700">نمای برنامه</h2>
+            <div class="bg-gray-100 p-4 rounded-lg text-center">
+                <div class="border-2 border-gray-300 rounded-lg p-4 bg-white shadow-inner max-w-2xl mx-auto">
+                    <div class="bg-blue-600 text-white py-2 rounded-t-lg">
+                        <h3 class="font-bold">استخراج لینک‌های قابل دانلود و اضافه به IDM</h3>
+                    </div>
+                    <div class="p-4 text-right">
+                        <div class="mb-4">
+                            <label class="block text-gray-700 mb-1">آدرس سایت:</label>
+                            <div class="flex">
+                                <input type="text" value="https://example.com" class="flex-1 border rounded p-2 ml-2 text-left" dir="ltr">
+                                <button class="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded">استخراج</button>
+                            </div>
+                        </div>
+                        <div class="mb-4">
+                            <label class="block text-gray-700 mb-1">پسوندهای مورد نظر (با کاما جدا کنید):</label>
+                            <input type="text" value="zip,rar,pdf,mp3,mp4,exe" class="w-full border rounded p-2 text-left" dir="ltr">
+                        </div>
+                        <div class="mb-4">
+                            <div class="flex items-center">
+                                <input type="checkbox" id="use_proxy" class="ml-2">
+                                <label for="use_proxy">استفاده از پروکسی</label>
+                            </div>
+                            <div class="flex mt-2">
+                                <input type="text" placeholder="آدرس:پورت" class="flex-1 border rounded p-2 text-left" dir="ltr">
+                            </div>
+                        </div>
+                        <div class="mb-4 border p-2 rounded bg-gray-50 h-32 overflow-y-auto text-left" dir="ltr">
+                            <div class="text-xs font-mono">
+                                <p class="text-green-600">[INFO] در حال استخراج لینک‌ها از https://example.com</p>
+                                <p class="text-blue-600">[+] لینک یافت شد: https://example.com/files/document.pdf</p>
+                                <p class="text-blue-600">[+] لینک یافت شد: https://example.com/download/app.zip</p>
+                                <p class="text-blue-600">[+] لینک یافت شد: https://example.com/media/sample.mp3</p>
+                                <p class="text-green-600">[INFO] اضافه کردن لینک‌ها به IDM...</p>
+                            </div>
+                        </div>
+                        <div class="text-center">
+                            <div class="bg-gray-200 rounded-full h-4 mb-2">
+                                <div class="bg-green-500 h-4 rounded-full w-2/3"></div>
+                            </div>
+                            <span class="text-sm text-gray-600">۶۶٪ تکمیل شده - ۳ لینک از ۳ سایت</span>
+                        </div>
+                        <div class="flex justify-between mt-4">
+                            <button class="bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded">توقف</button>
+                            <button class="bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded">اضافه به IDM</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Code -->
+        <section class="bg-white p-6 rounded-lg shadow mb-8">
+            <h2 class="text-2xl font-bold mb-4 text-blue-700">کد برنامه</h2>
+            <div class="bg-gray-800 text-white p-4 rounded-lg overflow-auto code-block">
+                <pre class="text-sm">import tkinter as tk
+import tkinter as tk
+from tkinter import ttk, scrolledtext, messagebox
+import threading
+import requests
+from bs4 import BeautifulSoup
+import win32com.client
+import re
+import os
+import time
+from urllib.parse import urljoin, urlparse
+
+
+class IDMDownloaderApp:
+    def __init__(self, root):
+        self.root = root
+        self.root.title("استخراج لینک‌های قابل دانلود و اضافه به IDM")
+        self.root.geometry("700x600")
+        self.root.configure(bg="#f0f2f5")
+        
+        # تنظیم فونت برای بهبود نمایش متون فارسی
+        default_font = ('Tahoma', 10)
+        
+        # تنظیم متغیرهای مورد نیاز
+        self.url_var = tk.StringVar()
+        self.extensions_var = tk.StringVar(value="zip,rar,pdf,mp3,mp4,exe")
+        self.proxy_var = tk.StringVar()
+        self.use_proxy_var = tk.BooleanVar(value=False)
+        self.stop_extraction = threading.Event()
+        self.extracted_links = []
+        
+        # ایجاد فریم اصلی
+        main_frame = tk.Frame(root, bg="#f0f2f5", padx=20, pady=20)
+        main_frame.pack(fill=tk.BOTH, expand=True)
+        
+        # بخش ورود آدرس سایت
+        url_frame = tk.Frame(main_frame, bg="#f0f2f5")
+        url_frame.pack(fill=tk.X, pady=5)
+        
+        tk.Label(url_frame, text="آدرس سایت:", bg="#f0f2f5", font=default_font).pack(anchor=tk.W)
+        
+        url_input_frame = tk.Frame(url_frame, bg="#f0f2f5")
+        url_input_frame.pack(fill=tk.X, pady=2)
+        
+        self.url_entry = tk.Entry(url_input_frame, textvariable=self.url_var, font=default_font)
+        self.url_entry.pack(side=tk.LEFT, fill=tk.X, expand=True, padx=(0, 5))
+        
+        self.extract_btn = tk.Button(url_input_frame, text="استخراج", 
+                                     command=self.start_extraction, bg="#4a7aff", fg="white",
+                                     font=default_font, padx=10)
+        self.extract_btn.pack(side=tk.RIGHT)
+        
+        # بخش پسوندهای مورد نظر
+        ext_frame = tk.Frame(main_frame, bg="#f0f2f5")
+        ext_frame.pack(fill=tk.X, pady=5)
+        
+        tk.Label(ext_frame, text="پسوندهای مورد نظر (با کاما جدا کنید):", 
+                bg="#f0f2f5", font=default_font).pack(anchor=tk.W)
+        
+        self.ext_entry = tk.Entry(ext_frame, textvariable=self.extensions_var, font=default_font)
+        self.ext_entry.pack(fill=tk.X, pady=2)
+        
+        # بخش پروکسی
+        proxy_frame = tk.Frame(main_frame, bg="#f0f2f5")
+        proxy_frame.pack(fill=tk.X, pady=5)
+        
+        proxy_check = tk.Checkbutton(proxy_frame, text="استفاده از پروکسی", 
+                                    variable=self.use_proxy_var, bg="#f0f2f5", 
+                                    font=default_font, command=self.toggle_proxy)
+        proxy_check.pack(anchor=tk.W)
+        
+        self.proxy_entry = tk.Entry(proxy_frame, textvariable=self.proxy_var, 
+                                  font=default_font, state=tk.DISABLED)
+        self.proxy_entry.pack(fill=tk.X, pady=2)
+        
+        # بخش نمایش لاگ
+        log_frame = tk.Frame(main_frame, bg="#f0f2f5")
+        log_frame.pack(fill=tk.BOTH, expand=True, pady=5)
+        
+        tk.Label(log_frame, text="گزارش عملیات:", bg="#f0f2f5", font=default_font).pack(anchor=tk.W)
+        
+        self.log_area = scrolledtext.ScrolledText(log_frame, font=('Consolas', 9), 
+                                               height=10, wrap=tk.WORD)
+        self.log_area.pack(fill=tk.BOTH, expand=True, pady=2)
+        
+        # بخش نمایش پیشرفت
+        progress_frame = tk.Frame(main_frame, bg="#f0f2f5")
+        progress_frame.pack(fill=tk.X, pady=5)
+        
+        self.progress_bar = ttk.Progressbar(progress_frame, orient=tk.HORIZONTAL, length=100, mode='determinate')
+        self.progress_bar.pack(fill=tk.X, pady=2)
+        
+        self.progress_label = tk.Label(progress_frame, text="آماده استخراج لینک‌ها...", 
+                                     bg="#f0f2f5", font=default_font)
+        self.progress_label.pack(anchor=tk.CENTER)
+        
+        # بخش دکمه‌های عملیات
+        btn_frame = tk.Frame(main_frame, bg="#f0f2f5")
+        btn_frame.pack(fill=tk.X, pady=10)
+        
+        self.stop_btn = tk.Button(btn_frame, text="توقف", command=self.stop_extraction_process, 
+                               bg="#ff4a4a", fg="white", font=default_font, padx=10, state=tk.DISABLED)
+        self.stop_btn.pack(side=tk.LEFT)
+        
+        self.add_to_idm_btn = tk.Button(btn_frame, text="اضافه به IDM", command=self.add_to_idm, 
+                                     bg="#4aff7a", fg="black", font=default_font, padx=10, state=tk.DISABLED)
+        self.add_to_idm_btn.pack(side=tk.RIGHT)
+        
+        # اعمال سبک RTL برای نمایش متون فارسی
+        self.apply_rtl_style()
+        
+    def apply_rtl_style(self):
+        # تغییر جهت المان‌ها برای پشتیبانی از RTL
+        for widget in [self.url_entry, self.ext_entry, self.proxy_entry]:
+            widget.configure(justify=tk.RIGHT)
+    
+    def toggle_proxy(self):
+        if self.use_proxy_var.get():
+            self.proxy_entry.configure(state=tk.NORMAL)
+        else:
+            self.proxy_entry.configure(state=tk.DISABLED)
+    
+    def log(self, message):
+        self.log_area.configure(state=tk.NORMAL)
+        self.log_area.insert(tk.END, message + "\n")
+        self.log_area.see(tk.END)
+        self.log_area.configure(state=tk.DISABLED)
+        self.root.update_idletasks()
+    
+    def start_extraction(self):
+        # تنظیم وضعیت اولیه
+        self.stop_extraction.clear()
+        self.extracted_links = []
+        self.log_area.configure(state=tk.NORMAL)
+        self.log_area.delete(1.0, tk.END)
+        self.log_area.configure(state=tk.DISABLED)
+        
+        url = self.url_var.get().strip()
+        
+        if not url:
+            messagebox.showerror("خطا", "لطفاً آدرس سایت را وارد کنید.")
+            return
+        
+        if not (url.startswith('http://') or url.startswith('https://')):
+            url = 'https://' + url
+            self.url_var.set(url)
+        
+        # فعال/غیرفعال کردن دکمه‌ها
+        self.extract_btn.configure(state=tk.DISABLED)
+        self.stop_btn.configure(state=tk.NORMAL)
+        self.add_to_idm_btn.configure(state=tk.DISABLED)
+        
+        self.progress_bar['value'] = 0
+        self.progress_label.configure(text="در حال آماده‌سازی...")
+        
+        # شروع پردازش در ترد جداگانه
+        thread = threading.Thread(target=self.extraction_process, args=(url,))
+        thread.daemon = True
+        thread.start()
+    
+    def extraction_process(self, url):
+        self.log(f"[INFO] در حال استخراج لینک‌ها از {url}")
+        
+        try:
+            # تنظیم پروکسی در صورت نیاز
+            proxies = None
+            if self.use_proxy_var.get() and self.proxy_var.get().strip():
+                proxy = self.proxy_var.get().strip()
+                proxies = {
+                    'http': f'http://{proxy}',
+                    'https': f'https://{proxy}'
+                }
+                self.log(f"[INFO] استفاده از پروکسی: {proxy}")
+            
+            # دریافت محتوای سایت
+            headers = {
+                'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36'
+            }
+            
+            response = requests.get(url, headers=headers, proxies=proxies, timeout=30)
+            response.raise_for_status()
+            
+            # پردازش محتوا با BeautifulSoup
+            soup = BeautifulSoup(response.text, 'html.parser')
+            
+            # استخراج تمام لینک‌ها
+            all_links = soup.find_all('a')
+            total_links = len(all_links)
+            
+            # فیلتر کردن بر اساس پسوندهای مورد نظر
+            extensions = [ext.strip().lower() for ext in self.extensions_var.get().split(',') if ext.strip()]
+            
+            self.log(f"[INFO] جستجوی لینک‌های با پسوند: {', '.join(extensions)}")
+            
+            base_url = url
+            
+            for i, link in enumerate(all_links):
+                if self.stop_extraction.is_set():
+                    self.log("[INFO] عملیات استخراج متوقف شد.")
+                    break
+                
+                href = link.get('href')
+                if not href:
+                    continue
+                
+                # تبدیل به URL مطلق
+                absolute_url = urljoin(base_url, href)
+                
+                # بررسی پسوند فایل
+                if extensions:
+                    parsed_url = urlparse(absolute_url)
+                    path = parsed_url.path.lower()
+                    
+                    if any(path.endswith(f'.{ext}') for ext in extensions):
+                        self.log(f"[+] لینک یافت شد: {absolute_url}")
+                        self.extracted_links.append(absolute_url)
+                else:
+                    # اگر پسوندی مشخص نشده باشد، همه لینک‌ها را اضافه می‌کنیم
+                    self.log(f"[+] لینک یافت شد: {absolute_url}")
+                    self.extracted_links.append(absolute_url)
+                
+                # به‌روزرسانی نوار پیشرفت
+                progress = int((i + 1) / total_links * 100)
+                self.progress_bar['value'] = progress
+                self.progress_label.configure(text=f"پیشرفت: {progress}% - {len(self.extracted_links)} لینک یافت شده")
+                self.root.update_idletasks()
+            
+            self.log(f"[INFO] استخراج لینک‌ها به پایان رسید. تعداد لینک‌های یافت شده: {len(self.extracted_links)}")
+            
+        except requests.exceptions.RequestException as e:
+            self.log(f"[ERROR] خطا در دریافت محتوای سایت: {str(e)}")
+        except Exception as e:
+            self.log(f"[ERROR] خطای غیرمنتظره: {str(e)}")
+        
+        # بازگرداندن وضعیت دکمه‌ها
+        self.extract_btn.configure(state=tk.NORMAL)
+        self.stop_btn.configure(state=tk.DISABLED)
+        
+        if self.extracted_links:
+            self.add_to_idm_btn.configure(state=tk.NORMAL)
+        
+        if not self.stop_extraction.is_set():
+            self.progress_bar['value'] = 100
+            self.progress_label.configure(text=f"استخراج تکمیل شد - {len(self.extracted_links)} لینک یافت شده")
+    
+    def stop_extraction_process(self):
+        self.stop_extraction.set()
+        self.log("[INFO] درخواست توقف عملیات استخراج...")
+    
+    def add_to_idm(self):
+        """با استفاده از رابط COM سعی میکند لینک‌ها را به IDM اضافه کند"""
+        if not self.extracted_links:
+            messagebox.showinfo("اطلاعات", "هیچ لینکی برای اضافه کردن به IDM یافت نشد.")
+            return
+        
+        try:
+            # تلاش برای اتصال به IDM با روش‌های مختلف
+            self.log("[INFO] در حال اتصال به IDM...")
+            
+            idm = None
+            error_messages = []
+            
+            # روش 1: استفاده از COMObject استاندارد
+            try:
+                idm = win32com.client.Dispatch("IDMan.COMObject")
+            except Exception as e:
+                error_messages.append(f"روش 1 ناموفق: {str(e)}")
+            
+            # روش 2: امتحان کردن با COMObject.1
+            if idm is None:
+                try:
+                    idm = win32com.client.Dispatch("IDMan.COMObject.1")
+                except Exception as e:
+                    error_messages.append(f"روش 2 ناموفق: {str(e)}")
+            
+            # روش 3: استفاده از dynamic dispatch
+            if idm is None:
+                try:
+                    idm = win32com.client.dynamic.Dispatch("IDMan.COMObject")
+                except Exception as e:
+                    error_messages.append(f"روش 3 ناموفق: {str(e)}")
+            
+            # روش 4: امتحان با نام‌های دیگر
+            if idm is None:
+                possible_names = ["IDManLib.IDManLib", "IDManLib.IDManLib.1", "IDM.COMObject", "IDM.COMObject.1"]
+                for name in possible_names:
+                    try:
+                        idm = win32com.client.Dispatch(name)
+                        self.log(f"[INFO] اتصال به IDM با {name} موفقیت‌آمیز بود.")
+                        break
+                    except Exception as e:
+                        error_messages.append(f"تلاش برای {name} ناموفق: {str(e)}")
+            
+            # اگر همه روش‌ها ناموفق بودند، به خط فرمان متوسل می‌شویم
+            if idm is None:
+                self.log("[INFO] امکان اتصال به IDM از طریق رابط COM وجود ندارد. استفاده از روش خط فرمان...")
+                return self.add_to_idm_by_commandline()
+            
+            # اگر به اینجا رسیدیم، یعنی موفق به اتصال به IDM شده‌ایم
+            self.progress_bar['value'] = 0
+            total_links = len(self.extracted_links)
+            
+            for i, link in enumerate(self.extracted_links):
+                try:
+                    # افزودن لینک به IDM - تغییر پارامتر آخر به 1 برای اضافه کردن مستقیم به صف دانلود
+                    # پارامترهای AddURL:
+                    # url, referer, cookie, user, pass, comment, group, flags
+                    # flags=1 یعنی اضافه کردن مستقیم به صف بدون نمایش پنجره
+                    idm.AddURL(link, "", "", "", "", "", "", "1")
+                    self.log(f"[+] لینک به صف دانلود IDM اضافه شد: {link}")
+                    
+                    # به‌روزرسانی نوار پیشرفت
+                    progress = int((i + 1) / total_links * 100)
+                    self.progress_bar['value'] = progress
+                    self.progress_label.configure(text=f"افزودن به IDM: {progress}% - {i+1}/{total_links}")
+                    self.root.update_idletasks()
+                    
+                    # کمی تأخیر
+                    time.sleep(0.1)
+                    
+                except Exception as e:
+                    self.log(f"[ERROR] خطا در افزودن لینک {link} به IDM: {str(e)}")
+            
+            self.log(f"[INFO] افزودن لینک‌ها به IDM به پایان رسید.")
+            messagebox.showinfo("تکمیل", f"{total_links} لینک با موفقیت به صف دانلود IDM اضافه شد.")
+            
+        except Exception as e:
+            error_msg = str(e)
+            self.log(f"[ERROR] خطا در اتصال به IDM: {error_msg}")
+            detailed_errors = "\n".join(error_messages)
+            self.log(f"جزئیات خطاها:\n{detailed_errors}")
+            
+            # در صورت خطا، از روش خط فرمان استفاده می‌کنیم
+            return self.add_to_idm_by_commandline()
+        
+        finally:
+            self.progress_bar['value'] = 100
+            self.progress_label.configure(text="عملیات تکمیل شد")
+    
+    def add_to_idm_by_commandline(self):
+        """استفاده از خط فرمان برای اضافه کردن لینک‌ها به IDM بدون نمایش پنجره دانلود"""
+        try:
+            # پیدا کردن مسیر نصب IDM
+            idm_paths = [
+                r"C:\Program Files (x86)\Internet Download Manager\IDMan.exe",
+                r"C:\Program Files\Internet Download Manager\IDMan.exe"
+            ]
+            
+            idm_path = None
+            for path in idm_paths:
+                if os.path.exists(path):
+                    idm_path = path
+                    break
+            
+            if not idm_path:
+                raise Exception("مسیر اجرایی IDM یافت نشد. لطفاً مطمئن شوید IDM نصب شده است.")
+            
+            self.log(f"[INFO] IDM در مسیر {idm_path} یافت شد. استفاده از روش خط فرمان.")
+            
+            self.progress_bar['value'] = 0
+            total_links = len(self.extracted_links)
+            
+            for i, link in enumerate(self.extracted_links):
+                try:
+                    # استفاده از خط فرمان برای اضافه کردن لینک به IDM 
+                    # استفاده از پارامتر /a برای اضافه کردن مستقیم به صف دانلود بدون نمایش پنجره
+                    import subprocess
+                    cmd = f'"{idm_path}" /a /d "{link}"'
+                    subprocess.Popen(cmd, shell=True)
+                    
+                    self.log(f"[+] لینک به صف دانلود IDM اضافه شد (روش خط فرمان): {link}")
+                    
+                    # به‌روزرسانی نوار پیشرفت
+                    progress = int((i + 1) / total_links * 100)
+                    self.progress_bar['value'] = progress
+                    self.progress_label.configure(text=f"افزودن به IDM: {progress}% - {i+1}/{total_links}")
+                    self.root.update_idletasks()
+                    
+                    # کمی تأخیر برای جلوگیری از فشار بیش از حد
+                    time.sleep(0.5)
+                    
+                except Exception as e:
+                    self.log(f"[ERROR] خطا در افزودن لینک {link} به IDM: {str(e)}")
+            
+            self.log(f"[INFO] افزودن لینک‌ها به IDM به پایان رسید.")
+            messagebox.showinfo("تکمیل", f"{total_links} لینک با موفقیت به صف دانلود IDM اضافه شد.")
+            return True
+            
+        except Exception as e:
+            error_msg = str(e)
+            self.log(f"[ERROR] خطا در استفاده از روش خط فرمان: {error_msg}")
+            messagebox.showerror("خطا", f"خطا در افزودن لینک‌ها به IDM با روش خط فرمان: {error_msg}")
+            return False
+
+
+if __name__ == "__main__":
+    root = tk.Tk()
+    app = IDMDownloaderApp(root)
+    root.mainloop()
+
+                </pre>
+            </div>
+        </section>
+
+        <!-- Installation and Usage Guide -->
+        <section class="bg-white p-6 rounded-lg shadow mb-8">
+            <h2 class="text-2xl font-bold mb-4 text-blue-700">راهنمای نصب و استفاده</h2>
+            
+            <div class="mb-6">
+                <h3 class="text-xl font-bold text-blue-600 mb-2">مراحل نصب</h3>
+                <ol class="list-decimal list-inside space-y-3 mr-5">
+                    <li class="bg-gray-50 p-3 rounded">
+                        <span class="font-bold">نصب پایتون:</span> ابتدا <a href="https://www.python.org/downloads/" target="_blank" class="text-blue-600 underline">پایتون</a> را نصب کنید (نسخه 3.6 یا بالاتر).
+                    </li>
+                    <li class="bg-gray-50 p-3 rounded">
+                        <span class="font-bold">نصب کتابخانه‌های مورد نیاز:</span> دستور زیر را در ترمینال یا خط فرمان اجرا کنید:
+                        <pre class="bg-gray-800 text-white p-2 rounded mt-2 text-sm code-block">pip install requests beautifulsoup4 pywin32</pre>
+                    </li>
+                    <li class="bg-gray-50 p-3 rounded">
+                        <span class="font-bold">ذخیره کد برنامه:</span> کد بالا را در یک فایل با پسوند <code>.py</code> ذخیره کنید (مثلاً <code>idm_downloader.py</code>).
+                    </li>
+                    <li class="bg-gray-50 p-3 rounded">
+                        <span class="font-bold">نصب IDM:</span> اطمینان حاصل کنید که نرم‌افزار <a href="https://www.internetdownloadmanager.com/" target="_blank" class="text-blue-600 underline">Internet Download Manager</a> نصب شده باشد.
+                    </li>
+                </ol>
+            </div>
+            
+            <div class="mb-6">
+                <h3 class="text-xl font-bold text-blue-600 mb-2">نحوه استفاده</h3>
+                <ol class="list-decimal list-inside space-y-3 mr-5">
+                    <li class="bg-gray-50 p-3 rounded">
+                        <span class="font-bold">اجرای برنامه:</span> فایل <code>idm_downloader.py</code> را اجرا کنید.
+                        <pre class="bg-gray-800 text-white p-2 rounded mt-2 text-sm code-block">python idm_downloader.py</pre>
+                    </li>
+                    <li class="bg-gray-50 p-3 rounded">
+                        <span class="font-bold">وارد کردن آدرس سایت:</span> آدرس سایت مورد نظر را در فیلد مربوطه وارد کنید.
+                    </li>
+                    <li class="bg-gray-50 p-3 rounded">
+                        <span class="font-bold">تنظیم پسوندهای مورد نظر:</span> پسوندهای فایل‌هایی که می‌خواهید دانلود کنید را مشخص کنید (مثلاً <code>zip,rar,pdf,mp3,mp4,exe</code>).
+                    </li>
+                    <li class="bg-gray-50 p-3 rounded">
+                        <span class="font-bold">استفاده از پروکسی (اختیاری):</span> در صورت نیاز، تیک گزینه "استفاده از پروکسی" را فعال کرده و آدرس و پورت پروکسی را وارد کنید.
+                    </li>
+                    <li class="bg-gray-50 p-3 rounded">
+                        <span class="font-bold">شروع استخراج:</span> دکمه "استخراج" را کلیک کنید تا فرآیند استخراج لینک‌ها آغاز شود.
+                    </li>
+                    <li class="bg-gray-50 p-3 rounded">
+                        <span class="font-bold">اضافه کردن به IDM:</span> پس از اتمام استخراج، دکمه "اضافه به IDM" را کلیک کنید تا لینک‌ها به صف دانلود IDM اضافه شوند.
+                    </li>
+                </ol>
+            </div>
+        </section>
+
+        <!-- Troubleshooting -->
+        <section class="bg-white p-6 rounded-lg shadow mb-8">
+            <h2 class="text-2xl font-bold mb-4 text-blue-700">رفع مشکلات احتمالی</h2>
+            
+            <div class="space-y-4">
+                <div class="bg-yellow-50 border-l-4 border-yellow-400 p-4">
+                    <h3 class="font-bold text-yellow-700">خطای "No module named 'requests'"</h3>
+                    <p>این خطا نشان می‌دهد که کتابخانه requests نصب نشده است. با اجرای دستور زیر آن را نصب کنید:</p>
+                    <pre class="bg-gray-800 text-white p-2 rounded mt-2 text-sm code-block">pip install requests</pre>
+                </div>
+                
+                <div class="bg-yellow-50 border-l-4 border-yellow-400 p-4">
+                    <h3 class="font-bold text-yellow-700">خطای "Object creation failed"</h3>
+                    <p>این خطا معمولاً زمانی رخ می‌دهد که برنامه نتواند به IDM متصل شود. اطمینان حاصل کنید که:</p>
+                    <ul class="list-disc list-inside mr-5 mt-2">
+                        <li>نرم‌افزار IDM نصب شده است</li>
+                        <li>IDM در حال اجراست</li>
+                        <li>کتابخانه pywin32 به درستی نصب شده است</li>
+                    </ul>
+                </div>
+                
+                <div class="bg-yellow-50 border-l-4 border-yellow-400 p-4">
+                    <h3 class="font-bold text-yellow-700">نمایش نادرست متون فارسی</h3>
+                    <p>اگر متون فارسی به درستی نمایش داده نمی‌شوند، می‌توانید:</p>
+                    <ul class="list-disc list-inside mr-5 mt-2">
+                        <li>از فونت‌های پشتیبانی‌کننده زبان فارسی استفاده کنید (مانند Tahoma)</li>
+                        <li>کدگذاری ترمینال خود را به UTF-8 تغییر دهید</li>
+                        <li>در ابتدای کد پایتون خود، خط زیر را اضافه کنید:</li>
+                    </ul>
+                    <pre class="bg-gray-800 text-white p-2 rounded mt-2 text-sm code-block"># -*- coding: utf-8 -*-</pre>
+                </div>
+                
+                <div class="bg-yellow-50 border-l-4 border-yellow-400 p-4">
+                    <h3 class="font-bold text-yellow-700">مشکل در استخراج لینک‌ها</h3>
+                    <p>برخی سایت‌ها ممکن است لینک‌های خود را به صورت 
+پویا بارگذاری کنند یا از JavaScript استفاده کنند که با BeautifulSoup 
+قابل استخراج نیستند. در این موارد می‌توانید:</p>
+                    <ul class="list-disc list-inside mr-5 mt-2">
+                        <li>از کتابخانه‌های پیشرفته‌تر مانند Selenium استفاده کنید</li>
+                        <li>به API سایت (در صورت وجود) متصل شوید</li>
+                    </ul>
+                </div>
+            </div>
+        </section>
+
+        <!-- Footer -->
+        <footer class="text-center text-gray-600 mt-8 p-4 border-t">
+            <p>این برنامه به منظور استفاده‌های آموزشی ایجاد شده است. لطفاً از آن برای اهداف قانونی استفاده کنید.</p>
+            <p class="mt-2">© توسعه‌دهنده: کاربر Python • استفاده مجدد و اصلاح این کد با ذکر منبع مجاز است.</p>
+        </footer>
+    </div>
+
+</body></html>
